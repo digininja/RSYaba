@@ -72,7 +72,9 @@ To do a HTTPS attack against a token protected site knowing the token is stored
 in the field token and that on a successful login the word "Success" is
 displayed on the screen
 
-```./rsyaba.rb https --host www.example.com --path /login/with_token.php -w 100_words.txt  --success_message="Success" --token_field="token" -U robin```
+```
+./rsyaba.rb https --host www.example.com --path /login/with_token.php -w 100_words.txt  --success_message="Success" --token_field="token" -U robin
+```
 
 Most of the generic command line options should be self explanatory, the only
 one that isn't is the throttleback option, for more information on that see the
