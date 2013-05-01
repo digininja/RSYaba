@@ -1,0 +1,52 @@
+SSH
+===
+
+This module should be as simple as the MySQL one, use the standard Ruby SSH
+module and have it make connections till it either connects successfully 
+but unfortunately for attackers the most common SSH server OpenSSH has built in
+security to protect against brute force attacks which stops it from being this
+simple.
+
+This is the quote from the sshd_config man page
+
+     MaxStartups
+             Specifies the maximum number of concurrent unauthenticated con-
+             nections to the SSH daemon.  Additional connections will be
+             dropped until authentication succeeds or the LoginGraceTime
+             expires for a connection.  The default is 10.
+
+             Alternatively, random early drop can be enabled by specifying the
+             three colon separated values ``start:rate:full'' (e.g.
+             "10:30:60").  sshd(8) will refuse connection attempts with a
+             probability of ``rate/100'' (30%) if there are currently
+             ``start'' (10) unauthenticated connections.  The probability
+             increases linearly and all connection attempts are refused if the
+             number of unauthenticated connections reaches ``full'' (60).
+
+Basically, by default, when you hit 10 connections it server starts to randomly
+drop connections till it it gets back under the limit. As we are hammering it
+then that 10 threshold comes quickly and doesn't have time to drop back down. As
+very few people ever change the defaults this will catch you on most servers you
+try.
+
+I've come up with a couple of ways to get around this but I'm not fully happy
+with any of them. The first is simply to drop the number of threads down and
+hope you don't hit the limit, you can do this with -t.
+
+The SSH server running on OS X doesn't seem affected by this and I've had
+reports of servers running on Microsoft platforms being OK as well.
+
+The second is to throttle the connections when the app starts to get connections
+dropped by the server. It does this by having a sleep delay that is slowly
+increased each time a connection is dropped. The hope is that this will slide up
+and end up slowing the connections enough that they stay under the threshold and
+no more get dropped. The dropped connections are then retried at the end of the
+session. The time added on at each step can be altered with the --throttle
+parameter, the default is to add 0.4 seconds on per connection which seems to
+offer a good balance but that depends on the connection speed of the network and
+other environmental issues.
+
+I've had intermittent results with this approach and managed to regularly lock
+up the ssh server I'm using to test. If you are going to test this make sure you
+have an alternative way to enter the box you are testing just in case the ssh
+server goes down.

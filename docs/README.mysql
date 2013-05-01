@@ -1,0 +1,6 @@
+MySQL
+=====
+
+There is nothing really too special about this module, it uses the standard
+Ruby MySQL library to make a connection to the specified database and checks if
+the connection succeeded or not, as soon as it works it reports success.

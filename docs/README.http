@@ -1,0 +1,39 @@
+HTTP/HTTPS
+==========
+
+This module was my initial reason for writing this tool. It allows you to brute
+force web login forms taking into consideration sessions and control tokens
+which are designed to prevent brute forcing.
+
+It does this by, at your request, first doing a GET on the page, storing the
+session cookie and then using it when doing the POST. If you tell it there is
+a field containing a protection key it will also collect that value and POST
+that back with the rest of the values. This more closely simulates a real world
+user logging in through a browser rather than most web form brute force tools
+which just blindly throw their values at the form. If a login is successful the
+cookie value that was used for the login is returned along with the login
+details, this allows you to go straight into the session without having to log
+in again.
+
+To just request a cookie before a login attempt use the --get_cookie parameter
+and to tell the app a field is a token use --token_field.
+
+Another thing which I find useful is the ability to specify either failure or
+success messages. Sometimes I know that a page will return a message saying
+"login failed" when you fail but I don't know what it says on success, in this
+situation you can set the --failure_message parameter to be that message and if
+the tool does not see this message then it assumes that the login worked.
+Similarly you might know that on a successful login you get a "Welcome" message
+so you can set that with --success_message.
+
+The default field names to use in the POST are username and password but they
+can both be overridden with --username_field and --password_field. For testing
+apps which have just a password field simply don't specify a username.
+
+In the unlikely event that the HTTP REFERRER is being checked by the login
+script you can specify that with --referrer and in case something like
+mod_security is checking user agent strings the user agent can be set with --ua.
+
+This module covers all the areas I've needed during brute force attacks on web
+apps but if you find I've missed anything please get in touch. I would like to
+make this tool the most comprehensive one around.
