@@ -6,5 +6,5 @@ require 'modules/http.rb'
 
 class Brute_https < Brute_http
   @@port = 443
-  @@protocol = "https"
+  @@protocol = 'https'
 end

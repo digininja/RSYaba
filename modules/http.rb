@@ -2,19 +2,19 @@
 require 'net/https'
 require 'uri'
 require 'modules/brute.rb'
-require "hpricot"
+require 'hpricot'
 
 class Brute_http < Brute
   @@port = 80
-  @@path = "/"
+  @@path = '/'
   @@get_cookie = false
   @@token_field = nil
-  @@ua = "Yaba"
-  @@referrer = "http://example.com"
-  @@username_field = "username"
-  @@password_field = "password"
-  @@protocol = "http"
-  @@success_message = "Success"
+  @@ua = 'Yaba'
+  @@referrer = 'http://example.com'
+  @@username_field = 'username'
+  @@password_field = 'password'
+  @@protocol = 'http'
+  @@success_message = 'Success'
   @@failure_message = nil
 
   @cookie = nil
@@ -32,21 +32,21 @@ class Brute_http < Brute
   def login
     if @@password_field.nil? or @@host.nil? or @@path.nil? or @@port.nil?
       Thread.abort_on_exception = true
-      raise MissingParameterException.new, "Missing parameters"
+      raise MissingParameterException.new, 'Missing parameters'
     end
 
     begin
       if @@verbose
         if @username.nil?
-          puts "Starting with " + @password
+          puts 'Starting with ' + @password
         else
-          puts "Starting with " + @username + " " + @password
+          puts 'Starting with ' + @username + ' ' + @password
         end
       end
 
       http = Net::HTTP.new(@@host, @@port)
 
-      if @@protocol == "https"
+      if @@protocol == 'https'
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       else
@@ -63,7 +63,7 @@ class Brute_http < Brute
         begin
           resp = http.get(@@path, nil)
         rescue NoMethodError => fault
-          puts "A connection to the website couldn't be made, is it up?"
+          puts 'A connection to the website couldn\'t be made, is it up?'
           exit
         end
 
@@ -71,12 +71,12 @@ class Brute_http < Brute
 
         if !@@token_field.nil?
           doc = Hpricot(resp.body)
-          (doc/"form//input").each do |row|
+          (doc/'form//input').each do |row|
             row.attributes.to_hash.each_pair { |key, value|
-              if key == "name" and value == @@token_field
-                @token = row.attributes.to_hash["value"] if row.attributes.to_hash.has_key?("value")
+              if key == 'name' and value == @@token_field
+                @token = row.attributes.to_hash['value'] if row.attributes.to_hash.has_key?('value')
                 if @@verbose
-                  puts "Token found " + @token
+                  puts 'Token found ' + @token
                 end
               end
             }
@@ -86,26 +86,26 @@ class Brute_http < Brute
         end
 
       end
-      headers ["Cookie"] = @cookie if !@cookie.nil?
+      headers ['Cookie'] = @cookie if !@cookie.nil?
 
       if @username.nil?
-        data = @@password_field + "=" + @password
+        data = @@password_field + '=' + @password
       else
-        data = @@username_field + "=" + @username + "&" + @@password_field + "=" + @password
+        data = @@username_field + '=' + @username + '&' + @@password_field + '=' + @password
       end
 
       if !@token.nil?
-        data += "&" + @@token_field + "=" + @token
+        data += '&' + @@token_field + '=' + @token
       end
 
       begin
         res = http.request_post(@@path, data, headers)
       rescue Errno::ECONNREFUSED =>fred
-        puts "A connection to the website couldn't be made, is it up?"
+        puts 'A connection to the website couldn\'t be made, is it up?'
         puts
         exit
       rescue NoMethodError => fault
-        puts "A connection to the website couldn't be made, is it up?"
+        puts 'A connection to the website couldn\'t be made, is it up?'
         puts
         exit
       end
@@ -119,11 +119,11 @@ class Brute_http < Brute
           # then running through the whole process again. And this has to be recursive till you finally
           # get to an end point as you could get multiple redirects
 
-          puts "Redirection occured - success occured - success?"
+          puts 'Redirection occured - success occured - success?'
           if @username.nil?
-            puts "Password used " + @password
+            puts 'Password used ' + @password
           else
-            puts "Password used " + @username + " " + @password
+            puts 'Password used ' + @username + ' ' + @password
           end
 
           puts
@@ -134,18 +134,18 @@ class Brute_http < Brute
           if !@@success_message.nil?
             if (/#{@@success_message}/.match(res.body))
               if @username.nil?
-                puts "Success with " + @password
+                puts 'Success with ' + @password
               else
-                puts "Success with " + @username + " " + @password
+                puts 'Success with ' + @username + ' ' + @password
               end
 
         #      puts res.body
               if @get_cookie
-                puts "The cookie is: " + @cookie.to_s
+                puts 'The cookie is: ' + @cookie.to_s
               end
               @success = true
             else
-    #          puts "failed"
+    #          puts 'failed'
             end
             # failed
           else
@@ -153,16 +153,16 @@ class Brute_http < Brute
             puts @@failure_message
             exit
             if (/#{@@failure_message}/.match(res.body))
-              puts "Failed with regex"
+              puts 'Failed with regex'
             else
               if @username.nil?
-                puts "Success with " + @password
+                puts 'Success with ' + @password
               else
-                puts "Success with " + @username + " " + @password
+                puts 'Success with ' + @username + ' ' + @password
               end
         #      puts res.body
               if @get_cookie
-                puts "The cookie is: " + @cookie
+                puts 'The cookie is: ' + @cookie
               end
               @success = true
             end
@@ -174,24 +174,24 @@ class Brute_http < Brute
 
       return @success
     rescue Net::HTTPServerException => detail
-      puts "Page not found"
+      puts 'Page not found'
       puts
       exit
     rescue MissingParameterException => detail
-      puts "Parameter not passed"
+      puts 'Parameter not passed'
       puts
       exit
     end
   end
 
   def dump_details
-    puts "http://" + @@host + @@path
-    puts "on port " + @@port.to_s
+    puts 'http://' + @@host + @@path
+    puts 'on port ' + @@port.to_s
   end
 
   def self.usage
     puts YABA_VERSION
-    puts "
+    puts '
 Usage for http module
 
 Usage: rsyaba.rb [OPTION] ... http
@@ -201,7 +201,7 @@ Usage: rsyaba.rb [OPTION] ... http
   --userlist x, -u x: a file containing the list of users
   --user x, -U x: a single username
   --throttle x, -T x: throttleback time, see SSH README for more information
-  --max_threads x, -t x: maximumn number of threads, more isn't always better, default 5
+  --max_threads x, -t x: maximumn number of threads, more isn\'t always better, default 5
   --path, -P: path
   --ua x: user agent string to use
   --referrer x: set the referrer
@@ -214,7 +214,7 @@ Usage: rsyaba.rb [OPTION] ... http
   --failure_message: the message received on failure
   -v: verbose
 
-"
+'
     exit
   end
 
@@ -222,7 +222,7 @@ Usage: rsyaba.rb [OPTION] ... http
     return [
       [ '--path', '-P', GetoptLong::REQUIRED_ARGUMENT ],
       [ '--get_cookie', '-c', GetoptLong::NO_ARGUMENT ],
-      [ '--port', "-p" , GetoptLong::REQUIRED_ARGUMENT ],
+      [ '--port', '-p' , GetoptLong::REQUIRED_ARGUMENT ],
       [ '--ua', GetoptLong::REQUIRED_ARGUMENT ],
       [ '--referrer', GetoptLong::REQUIRED_ARGUMENT ],
       [ '--token_field', GetoptLong::REQUIRED_ARGUMENT ],
@@ -237,27 +237,27 @@ Usage: rsyaba.rb [OPTION] ... http
     begin
       opts.each do |opt, arg|
         case opt
-          when "--username_field"
+          when '--username_field'
             @@username_field = arg
-          when "--password_field"
+          when '--password_field'
             @@password_field = arg
-          when "--token_field"
+          when '--token_field'
             @@token_field = arg
-          when "--path"
+          when '--path'
             @@path = arg
-          when "--port"
+          when '--port'
             @@port = arg.to_i
-          when "--get_cookie"
+          when '--get_cookie'
             @@get_cookie = true
-          when "--referrer"
+          when '--referrer'
             @@referrer = arg
-          when "--success_message"
+          when '--success_message'
             @@success_message = arg
             @@failure_message = nil
-          when "--failure_message"
+          when '--failure_message'
             @@success_message = nil
             @@failure_message = arg
-          when "--ua"
+          when '--ua'
             @@ua = arg
         end
       end
@@ -267,13 +267,13 @@ Usage: rsyaba.rb [OPTION] ... http
     end
 
     if @@path.nil?
-      puts "You must specify a path"
+      puts 'You must specify a path'
       puts
       self.usage
     end
 
     if @@path !~ /^\//
-      @@path = "/" + @@path
+      @@path = '/' + @@path
     end
 
   end

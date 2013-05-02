@@ -19,11 +19,11 @@ class Brute
   end
 
   def dump_details
-    puts "host: " + @@host
+    puts 'host: ' + @@host
   end
 
   def login
-    puts "no login code written"
+    puts 'no login code written'
     return true
   end
 
