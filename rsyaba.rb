@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: UTF-8
 
 # ==
 #
@@ -46,8 +47,8 @@ require 'rubygems'
 require 'getoptlong'
 
 THROTTLE_BACK_DELAY = 0.4
-MAX_THREADS = 5
-YABA_VERSION = 'rsyaba 1.0.1, Robin Wood (robin.wood@randomstorm.com) (www.randomstorm.com)'
+MAX_THREADS         = 5
+YABA_VERSION        = 'rsyaba 1.0.1, Robin Wood (robin.wood@randomstorm.com) (www.randomstorm.com)'
 
 class ThrottleBackException < RuntimeError
 end
@@ -58,20 +59,20 @@ end
 class MissingParameterException < RuntimeError
 end
 
-def to_class name
+def to_class(name)
   Kernel.const_get(name)
 end
 
 def get_protocols
   modules = []
-  Dir.foreach('./modules') { |file|
+  Dir.foreach('./modules') do |file|
     if /(.*)\.rb/.match(file)
       module_script = $1
       # Ignore the base class
       next if module_script == 'brute'
       modules << $1
     end
-  }
+  end
   modules.sort!
   return modules
 end
@@ -81,9 +82,7 @@ def list_protocols
   puts
 
   modules = get_protocols
-  modules.each { |mod|
-    puts mod
-  }
+  modules.each { |mod| puts mod }
   exit
 end
 
@@ -110,38 +109,36 @@ def is_numeric(s)
 end
 
 def random_password
-  return (0...8).map{65.+(rand(25)).chr}.join
+  return (0...8).map { 65.+(rand(25)).chr }.join
 end
 
-wordlist_fh = nil
-max_threads = MAX_THREADS
-verbose = false
-port = nil
+wordlist_fh    = nil
+max_threads    = MAX_THREADS
+verbose        = false
+port           = nil
 throttle_delay = THROTTLE_BACK_DELAY
 
-if ARGV.length < 1
-  usage
-end
+usage if ARGV.length < 1
 
 protocol = ARGV[0]
 
 case protocol
-  when '-?'
-    usage
-  when '--help'
-    usage
-  when '-l'
-    list_protocols
-  when '--list_protocols'
-    list_protocols
+when '-?'
+  usage
+when '--help'
+  usage
+when '-l'
+  list_protocols
+when '--list_protocols'
+  list_protocols
 end
 
 base_class = nil
-
-protocols = get_protocols
+protocols  = get_protocols
 
 if protocols.include? protocol
-  require ('modules/' + protocol + '.rb')
+  require 'modules/' + protocol + '.rb'
+
   base_class_name = 'Brute_' + protocol
   base_class = to_class base_class_name
 else
@@ -150,15 +147,15 @@ else
 end
 
 opts_arr = [
-  [ '--help', '-?', GetoptLong::NO_ARGUMENT ],
-  [ '--host', '-h' , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--wordlist', '-w' , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--userlist', '-u' , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--user', '-U' , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--throttle', '-T' , GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--max_threads', '-t' , GetoptLong::OPTIONAL_ARGUMENT ],
-  [ '--list_protocols', '-l' , GetoptLong::NO_ARGUMENT ],
-  [ '-v', GetoptLong::NO_ARGUMENT ]
+  ['--help', '-?', GetoptLong::NO_ARGUMENT],
+  ['--host', '-h' , GetoptLong::REQUIRED_ARGUMENT],
+  ['--wordlist', '-w' , GetoptLong::REQUIRED_ARGUMENT],
+  ['--userlist', '-u' , GetoptLong::REQUIRED_ARGUMENT],
+  ['--user', '-U' , GetoptLong::REQUIRED_ARGUMENT],
+  ['--throttle', '-T' , GetoptLong::REQUIRED_ARGUMENT],
+  ['--max_threads', '-t' , GetoptLong::OPTIONAL_ARGUMENT],
+  ['--list_protocols', '-l' , GetoptLong::NO_ARGUMENT],
+  ['-v', GetoptLong::NO_ARGUMENT]
 ]
 
 opts_arr += base_class.get_opts unless base_class.nil?
@@ -174,75 +171,75 @@ usernames = nil
 begin
   opts.each do |opt, arg|
     case opt
-      when '--userlist'
-        if !File.exist? arg
-          puts 'User list file not found'
-          puts
-          exit
-        end
-        usernames = {}
-        userlist_fh = File.open arg, 'r'
-        while !userlist_fh.eof?
-          user = userlist_fh.gets.chomp
-          usernames[user] = false
-        end
-        userlist_fh.close
-      when '--user'
-        usernames = {arg => false}
-      when '--port'
-        if is_numeric(arg)
-          port = arg.to_i
-          base_class.set_port(arg.to_i) unless base_class.nil?
-        else
-          puts 'Invalid port passed'
-          puts
-          exit
-        end
-      when '--list_protocols'
-        list_protocols
-      when '--help'
-        if base_class.nil?
-          usage
-        else
-          base_class.usage
-        end
-      when '--host'
-        base_class.set_host(arg) unless base_class.nil?
-        host = arg
-      when '--throttle'
-        if is_numeric arg
-          throttle_delay = arg.to_i
-        else
-          puts 'Invalid throttle time, using ' + THROTTLE_BACK_DELAY.to_s
-        end
-      when '--max_threads'
-        if is_numeric arg
-          max_threads = arg.to_i
-        else
-          puts 'Invalid number specified for max threads, using ' + MAX_THREADS.to_s
-        end
-      when '--wordlist'
-        if arg == '-'
-          wordlist_fh = STDIN
-        else
-          begin
-            if File.exist? arg
-              wordlist_fh = File.new(arg, 'r')
-            else
-              puts 'Word list file not found'
-              puts
-              exit
-            end
-          rescue
-            puts 'There was a problem opening the worlist file'
+    when '--userlist'
+      unless File.exist?(arg)
+        puts 'User list file not found'
+        puts
+        exit
+      end
+      usernames = {}
+      userlist_fh = File.open arg, 'r'
+      until userlist_fh.eof?
+        user = userlist_fh.gets.chomp
+        usernames[user] = false
+      end
+      userlist_fh.close
+    when '--user'
+      usernames = {arg => false}
+    when '--port'
+      if is_numeric(arg)
+        port = arg.to_i
+        base_class.set_port(arg.to_i) unless base_class.nil?
+      else
+        puts 'Invalid port passed'
+        puts
+        exit
+      end
+    when '--list_protocols'
+      list_protocols
+    when '--help'
+      if base_class.nil?
+        usage
+      else
+        base_class.usage
+      end
+    when '--host'
+      base_class.set_host(arg) unless base_class.nil?
+      host = arg
+    when '--throttle'
+      if is_numeric arg
+        throttle_delay = arg.to_i
+      else
+        puts 'Invalid throttle time, using ' + THROTTLE_BACK_DELAY.to_s
+      end
+    when '--max_threads'
+      if is_numeric arg
+        max_threads = arg.to_i
+      else
+        puts 'Invalid number specified for max threads, using ' + MAX_THREADS.to_s
+      end
+    when '--wordlist'
+      if arg == '-'
+        wordlist_fh = STDIN
+      else
+        begin
+          if File.exist? arg
+            wordlist_fh = File.new(arg, 'r')
+          else
+            puts 'Word list file not found'
+            puts
             exit
           end
+        rescue
+          puts 'There was a problem opening the worlist file'
+          exit
         end
-      when '-v'
-        verbose=true
-        base_class.set_verbose unless base_class.nil?
-      else
-        stored_opts << [opt, arg]
+      end
+    when '-v'
+      verbose = true
+      base_class.set_verbose unless base_class.nil?
+    else
+      stored_opts << [opt, arg]
     end
   end
 rescue GetoptLong::MissingArgument, GetoptLong::InvalidOption, MissingParameterException
@@ -269,9 +266,7 @@ if host.nil?
   end
 end
 
-if base_class.nil?
-  exit
-end
+exit if base_class.nil?
 
 base_class.parse_params stored_opts
 
@@ -292,15 +287,15 @@ if base_class.get_host.nil?
   exit
 end
 
-threads = []
+threads          = []
 $running_threads = 0
-sleep_delay = 0
-retries = []
+sleep_delay      = 0
+retries          = []
 
-while !wordlist_fh.eof?
+until wordlist_fh.eof?
   password = wordlist_fh.gets.chomp
 
-  usernames.each_pair { |username, succ|
+  usernames.each_pair do |username, succ|
   #  puts 'Testing username ' + username + ' ' + ' with password ' + password
 
     sleep sleep_delay
@@ -314,11 +309,9 @@ while !wordlist_fh.eof?
     b.username = username
     b.password = password
 
-    a = Thread.new {
+    a = Thread.new do
       begin
-        if b.login()
-          usernames[username] = true
-        end
+        usernames[username] = true if b.login
       rescue MissingParameterException
         puts
         puts 'A key parameter was missing'
@@ -328,20 +321,20 @@ while !wordlist_fh.eof?
         puts 'push ' + username + ' and ' + password + ' back into the stack to try again' if verbose
         retries << b
         #retries << {'password' => password, 'user' => username}
-        $running_threads -=1
+        $running_threads -= 1
       rescue => fault
         puts 'Something failed'
       #  puts fault.inspect
       #  puts fault.backtrace
         exit
       end
-    }
+    end
 
 #    puts 'sleep delay = ' + sleep_delay.to_s
     $running_threads += 1
     threads << a
 
-  }
+  end
 end
 
 wordlist_fh.close
@@ -349,7 +342,7 @@ wordlist_fh.close
 if retries.length > 0
   puts 'Finished first run through, retrying failed attempts'
 
-  retries.each { |b|
+  retries.each do |b|
   #  puts 'Testing username ' + username + ' ' + ' with password ' + password
 
     sleep sleep_delay
@@ -359,11 +352,9 @@ if retries.length > 0
 
     next if usernames[b.username]
 
-    a = Thread.new {
+    a = Thread.new do
       begin
-        if b.login()
-          usernames[b.username] = true
-        end
+        usernames[b.username] = true if b.login
       rescue MissingParameterException
         puts
         puts 'A key parameter was missing'
@@ -371,20 +362,18 @@ if retries.length > 0
       rescue ThrottleBackException
         sleep_delay += throttle_delay
         puts 'This pair failed for a second time, giving up on it ' + b.username + ' and ' + b.password + '' if verbose
-        $running_threads -=1
+        $running_threads -= 1
       rescue => fault
         puts 'Something failed'
       #  puts fault.inspect
       #  puts fault.backtrace
         exit
       end
-    }
+    end
 
     $running_threads += 1
     threads << a
-  }
+  end
 end
 
-threads.each { |x|
-  x.join
-}
+threads.each { |x| x.join }
