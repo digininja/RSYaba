@@ -1,4 +1,4 @@
-![alt text](http://www.randomstorm.com/images/rsyaba.png "RSYaba")
+![alt text](https://www.randomstorm.com/images/tools/RSYaba.png "RSYaba")
 
 rsyaba - RS Yet Another Brute Attacker
 ========================================
